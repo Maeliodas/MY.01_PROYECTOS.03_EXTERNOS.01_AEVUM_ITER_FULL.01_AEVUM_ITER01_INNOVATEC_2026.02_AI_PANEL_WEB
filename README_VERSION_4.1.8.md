@@ -1,12 +1,26 @@
 # Panel Aevum Iter · Versión APPROD4.1.8
 
-> **Versión completa actual: `APPROD4.1.8_R13_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
+> **Versión completa actual: `APPROD4.1.8_R16_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
 > versión **4**, actualizaciones mayores **1**, actualizaciones medianas **8**,
-> revisión **13**, rama **IN** (Innovatec).
+> revisión **16**, rama **IN** (Innovatec).
 
 Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adaptada a Aevum Iter.
 
-## Revisión R13 (actual): fuera pregunta abierta
+## Revisión R16 (actual): filtro de perfiles dinámico
+
+- El filtro `Perfil` traía 8 códigos fijos viejos que no coincidían con la tabla. Ahora lista los códigos distintos reales (`profileCodes` desde el servidor) sin tocar el refresco en vivo. Render EJS verificado.
+
+## Revisión R15: JS versionado anti-caché
+
+- `dashboard.ejs`: `/admin.js?v=<panelVersion>` para que cada versión jale su JS fresco aunque el navegador conserve caché.
+- `package.json` → `4.1.8-15`. Render EJS verificado.
+
+## Revisión R14: caché del navegador
+
+- `sw.js`: caché `aevum-admin-v1` → `v2` para expulsar el `admin.js` viejo. El HTML fresco traía 4 columnas pero el JS en caché repintaba 9 celdas (valores corridos). Con recarga dura (`Ctrl+Shift+R`) se corrige.
+- `package.json` → `4.1.8-14`.
+
+## Revisión R13: fuera pregunta abierta
 
 - Eliminado endpoint `PUT department-questions`, tarjeta por departamento, query de abiertas, columna `Respuestas` y `departmentQuestions` del payload admin. Tablas e ingesta intactas.
 - Sintaxis y render EJS verificados.
@@ -27,7 +41,7 @@ Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adapt
 
 ## Rebrand a Aevum Iter
 
-- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R13_IN`.
+- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R16_IN`.
 - Textos: servicio `aevum-iter-panel`, cookie `aevum_iter_admin`, login, dashboard, manifiesto PWA, SW (`aevum-admin-v1`), `db.js` y `schema.sql` (BD `aevum_iter`, URLs de carreras a `NULL`).
 - Iconos: `icon-192/512.png`, `apple-touch-icon.png` y `public/img/app-logo.png` generados del logo brújula; `assets/aevum_logo.png` para el PDF.
 - Eliminados assets institucionales (`tecnm_*`, `sep_*`, `escudo_*`, `cert_*`, `app_logo.png` anterior).

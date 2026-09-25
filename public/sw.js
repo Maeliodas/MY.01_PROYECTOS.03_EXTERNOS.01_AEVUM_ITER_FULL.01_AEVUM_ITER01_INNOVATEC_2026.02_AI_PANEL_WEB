@@ -2,7 +2,7 @@
  * Estáticos con revalidación; API, Socket.IO y navegaciones siempre en vivo.
  * Nunca cachea datos: el dashboard y los catálogos salen de la red o fallan.
  */
-const CACHE = 'aevum-admin-v1';
+const CACHE = 'aevum-admin-v2';
 const CORE = [
   '/styles.css',
   '/admin.js',

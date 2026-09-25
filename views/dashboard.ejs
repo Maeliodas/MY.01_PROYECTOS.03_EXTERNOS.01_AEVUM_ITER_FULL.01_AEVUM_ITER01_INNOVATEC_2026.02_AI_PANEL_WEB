@@ -38,7 +38,7 @@
           </div>
           <div class="filter-grid">
             <label>Perfil
-              <select name="profile"><option value="">Todos</option><% for (const code of ['RIA','RIC','IRC','ICR','IAS','SAE','ESC','CEI']) { %><option value="<%= code %>" <%= filters.profile===code?'selected':'' %>><%= code %></option><% } %></select>
+              <select name="profile"><option value="">Todos</option><% for (const code of data.profileCodes ?? []) { %><option value="<%= code %>" <%= filters.profile===code?'selected':'' %>><%= code %></option><% } %></select>
             </label>
             <label>Carrera
               <select name="career"><option value="">Todas</option><% for (const row of catalogs.careers ?? []) { if(row.active) { %><option value="<%= row.id %>" <%= filters.career===row.id?'selected':'' %>><%= row.name %></option><% } } %></select>
@@ -104,7 +104,7 @@
 
   <script id="dashboard-data" type="application/json"><%- JSON.stringify({careers:data.careers,schools:data.schools,provenance:data.provenance,profiles:data.profiles,affinity:data.affinity,languages:data.languages,idioms:data.idioms,municipalities:catalogs.municipalities,schoolCatalog:catalogs.schools}) %></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/admin.js"></script>
+  <script src="/admin.js?v=<%= panelVersion %>"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){})}</script>
 </body>
 </html>
