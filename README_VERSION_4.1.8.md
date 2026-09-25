@@ -1,12 +1,17 @@
 # Panel Aevum Iter · Versión APPROD4.1.8
 
-> **Versión completa actual: `APPROD4.1.8_R16_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
+> **Versión completa actual: `APPROD4.1.8_R17_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
 > versión **4**, actualizaciones mayores **1**, actualizaciones medianas **8**,
-> revisión **16**, rama **IN** (Innovatec).
+> revisión **17**, rama **IN** (Innovatec).
 
 Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adaptada a Aevum Iter.
 
-## Revisión R16 (actual): filtro de perfiles dinámico
+## Revisión R17 (actual): todo en vivo
+
+- Filtros `Perfil`/`Carrera` se sincronizan en cada refresco (`careerOptions` nuevo en el payload) sin tocar la selección del usuario.
+- Cambios de catálogo refrescan las vistas vía `softRefreshKeepContext` existente. Sintaxis y arranque verificados.
+
+## Revisión R16: filtro de perfiles dinámico
 
 - El filtro `Perfil` traía 8 códigos fijos viejos que no coincidían con la tabla. Ahora lista los códigos distintos reales (`profileCodes` desde el servidor) sin tocar el refresco en vivo. Render EJS verificado.
 
@@ -41,7 +46,7 @@ Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adapt
 
 ## Rebrand a Aevum Iter
 
-- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R16_IN`.
+- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R17_IN`.
 - Textos: servicio `aevum-iter-panel`, cookie `aevum_iter_admin`, login, dashboard, manifiesto PWA, SW (`aevum-admin-v1`), `db.js` y `schema.sql` (BD `aevum_iter`, URLs de carreras a `NULL`).
 - Iconos: `icon-192/512.png`, `apple-touch-icon.png` y `public/img/app-logo.png` generados del logo brújula; `assets/aevum_logo.png` para el PDF.
 - Eliminados assets institucionales (`tecnm_*`, `sep_*`, `escudo_*`, `cert_*`, `app_logo.png` anterior).

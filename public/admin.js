@@ -355,6 +355,33 @@ function updateKpis(totals) {
   }
 }
 
+function syncSelectOptions(selectId, values) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  const current = select.value;
+  const seen = new Set(['']);
+  [...select.options].forEach(o => seen.add(o.value));
+  let changed = false;
+  for (const v of values || []) {
+    const value = String(v.value ?? v);
+    const label = String(v.label ?? v);
+    if (!value || seen.has(value)) continue;
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    select.appendChild(option);
+    changed = true;
+  }
+  if (current) select.value = current;
+  return changed;
+}
+
+function refreshFilterOptions(payload) {
+  if (!payload) return;
+  syncSelectOptions('filterProfile', payload.profileCodes);
+  syncSelectOptions('filterCareer', (payload.careerOptions || []).map(c => ({ value: c.id, label: c.name })));
+}
+
 function currentFilterQuery() {
   const form = document.getElementById('filterForm');
   if (!form) return '';
@@ -385,6 +412,7 @@ async function refreshDashboard(silent = false) {
     updateKpis(payload.totals);
     renderChartsFromData(payload);
     renderEvaluationRows(payload.evaluations);
+    refreshFilterOptions(payload);
     syncPdfLink();
     // actualizar history sin reload
     const newUrl = q ? `/?${q}` : '/';
@@ -603,7 +631,7 @@ function rebindCatalogUi() {
     if (typeof refreshDashboard === 'function') refreshDashboard(true);
     if (lastEvalCount != null) lastEvalCount += 1;
   });
-  socket.on('catalog-updated', () => { showLiveToast('Catálogo actualizado', ''); pollLiveState(); });
+  socket.on('catalog-updated', () => { showLiveToast('Catálogo actualizado', ''); pollLiveState(); if (typeof softRefreshKeepContext === 'function') softRefreshKeepContext(); });
   startPolling(20000);
 })();
 

@@ -27,7 +27,7 @@ function notifyAdmins(event, payload = {}) {
 
 
 const port = Number(process.env.PORT ?? 8080);
-const panelVersion = 'APPROD4.1.8_R16_IN';
+const panelVersion = 'APPROD4.1.8_R17_IN';
 const apiIngestKey = process.env.API_INGEST_KEY ?? '';
 const adminUser = process.env.ADMIN_USER ?? '';
 const adminPassword = process.env.ADMIN_PASSWORD ?? '';
@@ -342,6 +342,7 @@ async function dashboardData(query = {}) {
   const [careers] = await pool.query(`SELECT e.top_career_name label, COUNT(*) value ${base} ${where} GROUP BY e.top_career_name ORDER BY value DESC LIMIT 10`, params);
   const [profiles] = await pool.query(`SELECT e.holland_code label, COUNT(*) value ${base} ${where} GROUP BY e.holland_code ORDER BY value DESC LIMIT 10`, params);
   const [profileCodes] = await pool.query(`SELECT DISTINCT e.holland_code code ${base} ${where} ORDER BY code`, params);
+  const [careerOptions] = await pool.query(`SELECT id, name FROM careers WHERE active=1 ORDER BY name`, []);
   const [affinity] = await pool.query(
     `SELECT CASE WHEN e.top_career_affinity < 50 THEN 'Menos de 50%' WHEN e.top_career_affinity < 65 THEN '50–64%' WHEN e.top_career_affinity < 80 THEN '65–79%' WHEN e.top_career_affinity < 90 THEN '80–89%' ELSE '90–100%' END label,
             COUNT(*) value,
@@ -359,7 +360,7 @@ async function dashboardData(query = {}) {
      ORDER BY e.completed_at DESC, e.id DESC LIMIT 300`,
     params,
   );
-  return { totals, careers, profiles, profileCodes: profileCodes.map(r => r.code), affinity, evaluations: recentEvaluations };
+  return { totals, careers, profiles, profileCodes: profileCodes.map(r => r.code), careerOptions, affinity, evaluations: recentEvaluations };
 }
 
 async function catalogAdminData() {

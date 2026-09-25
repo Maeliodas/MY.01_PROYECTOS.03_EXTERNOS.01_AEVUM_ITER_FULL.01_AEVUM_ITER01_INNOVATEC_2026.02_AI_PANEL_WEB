@@ -1,11 +1,11 @@
 <div align="center">
   <img src="public/img/app-logo.png" alt="Aevum Iter" width="140"/>
 
-  # Panel Aevum Iter APPROD4.1.8_R16_IN
+  # Panel Aevum Iter APPROD4.1.8_R17_IN
 
   **Administración de orientación vocacional** — catálogos versionados, resultados en vivo y reportes PDF genéricos.
 
-  [![release](https://img.shields.io/badge/release-APPROD4.1.8__R16__IN-0262FC?style=for-the-badge)](README_VERSION_4.1.8.md)
+  [![release](https://img.shields.io/badge/release-APPROD4.1.8__R17__IN-0262FC?style=for-the-badge)](README_VERSION_4.1.8.md)
   [![node](https://img.shields.io/badge/Node.js-Express_4-339933?style=for-the-badge&logo=node.js&logoColor=white)](src/server.js)
   [![mysql](https://img.shields.io/badge/MySQL_MariaDB-utf8mb4-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](sql/schema.sql)
   [![realtime](https://img.shields.io/badge/Tiempo_real-Socket.IO-010101?style=for-the-badge&logo=socket.io&logoColor=white)](src/server.js)
@@ -38,7 +38,7 @@ La key de ingesta debe coincidir con `AEVUM_ITER_API_KEY` al compilar la app.
 
 ## 🔢 Versionado
 
-Esquema estilo ZZZ: siglas+canal pegados, versión y revisiones con guion bajo — `APPROD4.1.8_R16_IN`:
+Esquema estilo ZZZ: siglas+canal pegados, versión y revisiones con guion bajo — `APPROD4.1.8_R17_IN`:
 
 | Parte | Significado |
 |---|---|
@@ -54,10 +54,10 @@ Esquema estilo ZZZ: siglas+canal pegados, versión y revisiones con guion bajo �
 
 | Versión | Cambios (general) | Detalle |
 |---|---|---|
-| [APPROD4.1.8_R16_IN](README_VERSION_4.1.8.md) | Fuera pregunta abierta (endpoint, tarjeta, columna y payload) | [Ver detalle](README_VERSION_4.1.8.md) |
+| [APPROD4.1.8_R17_IN](README_VERSION_4.1.8.md) | Fuera pregunta abierta (endpoint, tarjeta, columna y payload) | [Ver detalle](README_VERSION_4.1.8.md) |
 
 ---
 
 <div align="center">
-  <sub>Panel Aevum Iter APPROD4.1.8_R16_IN · Rama Innovatec</sub>
+  <sub>Panel Aevum Iter APPROD4.1.8_R17_IN · Rama Innovatec</sub>
 </div>
