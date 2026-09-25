@@ -27,7 +27,7 @@ function notifyAdmins(event, payload = {}) {
 
 
 const port = Number(process.env.PORT ?? 8080);
-const panelVersion = 'APPROD4.1.8_R17_IN';
+const panelVersion = 'APPROD4.1.8_R19_IN';
 const apiIngestKey = process.env.API_INGEST_KEY ?? '';
 const adminUser = process.env.ADMIN_USER ?? '';
 const adminPassword = process.env.ADMIN_PASSWORD ?? '';
@@ -615,6 +615,18 @@ app.delete('/api/admin/catalog/:type/:id', requireAdmin, async (req, res) => {
 
 
 // ─── Estado en vivo (refresco sin recargar la página) ─────────
+// Opciones de filtros (liviano, para sondeo). No toca la selección del usuario.
+app.get('/api/admin/filter-options', requireAdmin, async (_req, res) => {
+  try {
+    const [codes] = await pool.query('SELECT DISTINCT holland_code code FROM evaluations ORDER BY code');
+    const [careers] = await pool.query('SELECT id, name FROM careers WHERE active=1 ORDER BY name');
+    res.json({ profileCodes: codes.map(r => r.code), careerOptions: careers });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'No fue posible obtener opciones' });
+  }
+});
+
 app.get('/api/admin/live-state', requireAdmin, async (req, res) => {
   try {
     const [metaResult, totalsResult] = await Promise.all([

@@ -1,12 +1,22 @@
 # Panel Aevum Iter · Versión APPROD4.1.8
 
-> **Versión completa actual: `APPROD4.1.8_R17_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
+> **Versión completa actual: `APPROD4.1.8_R19_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
 > versión **4**, actualizaciones mayores **1**, actualizaciones medianas **8**,
-> revisión **17**, rama **IN** (Innovatec).
+> revisión **19**, rama **IN** (Innovatec).
 
 Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adaptada a Aevum Iter.
 
-## Revisión R17 (actual): todo en vivo
+## Revisión R19 (actual): ids en selects de filtro
+
+- Los `<select>` de perfil/carrera no tenían `id`: el JS los buscaba y no los encontraba (fallo silencioso). Agregados `filterProfile`/`filterCareer`. Render verificado.
+- `package.json` → `4.1.8-19`.
+
+## Revisión R18: filtros en cada sondeo
+
+- Nuevo `GET /api/admin/filter-options` (liviano): el sondeo de 20 s actualiza opciones de filtros aunque no haya evaluaciones nuevas. Sin flicker (solo `<select>`).
+- Verificado: ruta responde 401 sin sesión, proceso vivo.
+
+## Revisión R17: todo en vivo
 
 - Filtros `Perfil`/`Carrera` se sincronizan en cada refresco (`careerOptions` nuevo en el payload) sin tocar la selección del usuario.
 - Cambios de catálogo refrescan las vistas vía `softRefreshKeepContext` existente. Sintaxis y arranque verificados.
@@ -46,7 +56,7 @@ Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adapt
 
 ## Rebrand a Aevum Iter
 
-- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R17_IN`.
+- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R19_IN`.
 - Textos: servicio `aevum-iter-panel`, cookie `aevum_iter_admin`, login, dashboard, manifiesto PWA, SW (`aevum-admin-v1`), `db.js` y `schema.sql` (BD `aevum_iter`, URLs de carreras a `NULL`).
 - Iconos: `icon-192/512.png`, `apple-touch-icon.png` y `public/img/app-logo.png` generados del logo brújula; `assets/aevum_logo.png` para el PDF.
 - Eliminados assets institucionales (`tecnm_*`, `sep_*`, `escudo_*`, `cert_*`, `app_logo.png` anterior).

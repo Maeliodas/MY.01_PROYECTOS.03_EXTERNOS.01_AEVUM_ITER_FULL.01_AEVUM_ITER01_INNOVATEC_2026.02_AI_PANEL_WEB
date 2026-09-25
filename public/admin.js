@@ -596,6 +596,10 @@ function rebindCatalogUi() {
         }
         lastEvalCount = Number(total);
       }
+      try {
+        const fres = await fetch('/api/admin/filter-options', { credentials: 'same-origin' });
+        if (fres.ok) refreshFilterOptions(await fres.json());
+      } catch (_) { /* filtros se actualizan en el siguiente ciclo */ }
       if (!socketConnected) setStatus('Datos al día (polling)', '#c9a227');
     } catch (err) {
       if (!socketConnected) setStatus('Sin conexión en vivo', '#a64343');
