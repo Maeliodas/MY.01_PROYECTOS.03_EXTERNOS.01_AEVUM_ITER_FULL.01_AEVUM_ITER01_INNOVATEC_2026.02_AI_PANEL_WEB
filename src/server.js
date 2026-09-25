@@ -27,7 +27,7 @@ function notifyAdmins(event, payload = {}) {
 
 
 const port = Number(process.env.PORT ?? 8080);
-const panelVersion = 'APPROD4.1.8_R11_IN';
+const panelVersion = 'APPROD4.1.8_R12_IN';
 const apiIngestKey = process.env.API_INGEST_KEY ?? '';
 const adminUser = process.env.ADMIN_USER ?? '';
 const adminPassword = process.env.ADMIN_PASSWORD ?? '';
@@ -334,14 +334,12 @@ async function dashboardData(query = {}) {
     LEFT JOIN municipalities pm ON pm.id=cs.municipality_id
     LEFT JOIN states pst ON pst.id=pm.state_id`;
   const [[totals]] = await pool.query(
-    `SELECT COUNT(*) total_evaluations, COUNT(DISTINCT COALESCE(sc.name,cs.name)) schools,
+    `SELECT COUNT(*) total_evaluations,
             ROUND(AVG(e.top_career_affinity),1) average_affinity,
             COUNT(DISTINCT e.holland_code) profiles ${base} ${where}`,
     params,
   );
   const [careers] = await pool.query(`SELECT e.top_career_name label, COUNT(*) value ${base} ${where} GROUP BY e.top_career_name ORDER BY value DESC LIMIT 10`, params);
-  const [schools] = await pool.query(`SELECT COALESCE(sc.name,cs.name,'No especificada') label, COUNT(*) value ${base} ${where} GROUP BY COALESCE(sc.name,cs.name,'No especificada') ORDER BY value DESC LIMIT 10`, params);
-  const [provenance] = await pool.query(`SELECT CONCAT(COALESCE(m.name,pm.name,'No especificado'), ', ', COALESCE(st.name,pst.name,'No especificado')) label, COUNT(*) value ${base} ${where} GROUP BY CONCAT(COALESCE(m.name,pm.name,'No especificado'), ', ', COALESCE(st.name,pst.name,'No especificado')) ORDER BY value DESC LIMIT 10`, params);
   const [profiles] = await pool.query(`SELECT e.holland_code label, COUNT(*) value ${base} ${where} GROUP BY e.holland_code ORDER BY value DESC LIMIT 10`, params);
   const [affinity] = await pool.query(
     `SELECT CASE WHEN e.top_career_affinity < 50 THEN 'Menos de 50%' WHEN e.top_career_affinity < 65 THEN '50–64%' WHEN e.top_career_affinity < 80 THEN '65–79%' WHEN e.top_career_affinity < 90 THEN '80–89%' ELSE '90–100%' END label,
@@ -350,34 +348,12 @@ async function dashboardData(query = {}) {
      ${base} ${where} GROUP BY label,sort_order ORDER BY sort_order`,
     params,
   );
-  // Languages are filtered through the selected evaluation students.
-  const languageFilter = where ? where.replaceAll('e.', 'e.').replace('WHERE', 'AND') : '';
-  const [languages] = await pool.query(
-    `SELECT sl.name label, COUNT(*) value FROM student_languages sl
-     JOIN students s ON s.id=sl.student_id JOIN evaluations e ON e.student_id=s.id
-     LEFT JOIN schools sc ON sc.id=s.school_id LEFT JOIN municipalities m ON m.id=sc.municipality_id LEFT JOIN states st ON st.id=m.state_id
-     LEFT JOIN catalog_suggestions cs ON cs.id=s.school_suggestion_id AND cs.kind='escuela' LEFT JOIN municipalities pm ON pm.id=cs.municipality_id LEFT JOIN states pst ON pst.id=pm.state_id
-     WHERE sl.kind='lengua' ${languageFilter} GROUP BY sl.name ORDER BY value DESC,sl.name LIMIT 10`,
-    params,
-  );
-  const [idioms] = await pool.query(
-    `SELECT sl.name label, COUNT(*) value FROM student_languages sl
-     JOIN students s ON s.id=sl.student_id JOIN evaluations e ON e.student_id=s.id
-     LEFT JOIN schools sc ON sc.id=s.school_id LEFT JOIN municipalities m ON m.id=sc.municipality_id LEFT JOIN states st ON st.id=m.state_id
-     LEFT JOIN catalog_suggestions cs ON cs.id=s.school_suggestion_id AND cs.kind='escuela' LEFT JOIN municipalities pm ON pm.id=cs.municipality_id LEFT JOIN states pst ON pst.id=pm.state_id
-     WHERE sl.kind='idioma' ${languageFilter} GROUP BY sl.name ORDER BY value DESC,sl.name LIMIT 10`,
-    params,
-  );
   // La tabla de resultados no depende de un JOIN/GROUP BY con student_languages.
   // Esto evita que una evaluación válida desaparezca del panel por diferencias
   // de SQL mode o por no tener lenguas/idiomas asociados.
   const [recentEvaluations] = await pool.query(
-    `SELECT e.id,COALESCE(st.name,pst.name) state_name,COALESCE(m.name,pm.name) municipality_name,COALESCE(sc.name,cs.name) school_name,e.holland_code,
-            e.top_career_name,e.top_career_affinity,e.completed_at,
-            (SELECT GROUP_CONCAT(DISTINCT sl.name ORDER BY sl.name SEPARATOR ', ')
-               FROM student_languages sl WHERE sl.student_id=s.id AND sl.kind='lengua') lenguas,
-            (SELECT GROUP_CONCAT(DISTINCT sl.name ORDER BY sl.name SEPARATOR ', ')
-               FROM student_languages sl WHERE sl.student_id=s.id AND sl.kind='idioma') idiomas
+    `SELECT e.id,e.holland_code,
+            e.top_career_name,e.top_career_affinity,e.completed_at
      ${base} ${where}
      ORDER BY e.completed_at DESC, e.id DESC LIMIT 300`,
     params,
@@ -406,7 +382,7 @@ async function dashboardData(query = {}) {
     answersByEvaluation[row.evaluation_id].push(row);
   }
   for (const row of recentEvaluations) row.open_answers = answersByEvaluation[row.id] ?? [];
-  return { totals, careers, schools, provenance, profiles, affinity, languages, idioms, evaluations: recentEvaluations };
+  return { totals, careers, profiles, affinity, evaluations: recentEvaluations };
 }
 
 async function catalogAdminData() {
@@ -687,10 +663,9 @@ app.get('/api/admin/live-state', requireAdmin, async (req, res) => {
     const [metaResult, totalsResult] = await Promise.all([
       pool.query('SELECT version, updated_at FROM catalog_meta WHERE id=1'),
       pool.query(`SELECT COUNT(*) total_evaluations,
-                         COUNT(DISTINCT COALESCE(sc.name,cs.name)) schools,
                          COUNT(DISTINCT e.holland_code) profiles,
                          ROUND(AVG(e.top_career_affinity),1) average_affinity
-                    FROM evaluations e JOIN students s ON s.id=e.student_id LEFT JOIN schools sc ON sc.id=s.school_id LEFT JOIN catalog_suggestions cs ON cs.id=s.school_suggestion_id`),
+                    FROM evaluations e JOIN students s ON s.id=e.student_id`),
     ]);
     const meta = metaResult[0][0] ?? {};
     const totals = totalsResult[0][0] ?? {};
@@ -699,7 +674,6 @@ app.get('/api/admin/live-state', requireAdmin, async (req, res) => {
       catalogUpdatedAt: meta.updated_at ?? null,
       totals: {
         total_evaluations: Number(totals.total_evaluations ?? 0),
-        schools: Number(totals.schools ?? 0),
         profiles: Number(totals.profiles ?? 0),
         average_affinity: totals.average_affinity != null ? Number(totals.average_affinity) : null,
       },
@@ -719,27 +693,12 @@ app.get('/api/admin/report.pdf', requireAdmin, async (req, res) => {
 
     // Resolver nombres legibles de filtros (si vienen como id)
     let filterLabels = {
-      state: filters.state || null,
-      municipality: filters.municipality || null,
-      school: filters.school || null,
       profile: filters.profile || null,
       career: filters.career || null,
       from: filters.from || null,
       to: filters.to || null,
     };
     try {
-      if (filters.state) {
-        const [[r]] = await pool.query('SELECT name FROM states WHERE id=? LIMIT 1', [filters.state]);
-        if (r?.name) filterLabels.state = r.name;
-      }
-      if (filters.municipality) {
-        const [[r]] = await pool.query('SELECT name FROM municipalities WHERE id=? LIMIT 1', [filters.municipality]);
-        if (r?.name) filterLabels.municipality = r.name;
-      }
-      if (filters.school) {
-        const [[r]] = await pool.query('SELECT name FROM schools WHERE id=? LIMIT 1', [filters.school]);
-        if (r?.name) filterLabels.school = r.name;
-      }
       if (filters.career) {
         const [[r]] = await pool.query('SELECT name FROM careers WHERE id=? LIMIT 1', [filters.career]);
         if (r?.name) filterLabels.career = r.name;
@@ -951,14 +910,13 @@ app.get('/api/admin/report.pdf', requireAdmin, async (req, res) => {
       ensureSpace(70);
       const items = [
         { label: 'Evaluaciones', value: String(totals.total_evaluations ?? 0) },
-        { label: 'Escuelas', value: String(totals.schools ?? 0) },
         { label: 'Perfiles Holland', value: String(totals.profiles ?? 0) },
         {
           label: 'Afinidad media',
           value: totals.average_affinity != null ? `${totals.average_affinity}%` : '—',
         },
       ];
-      const boxW = (contentW - 18) / 4;
+      const boxW = (contentW - 12) / 3;
       const y = doc.y;
       items.forEach((item, i) => {
         const x = marginL + i * (boxW + 6);
@@ -985,9 +943,6 @@ app.get('/api/admin/report.pdf', requireAdmin, async (req, res) => {
     sectionTitle('1. Alcance del reporte');
 
     const scopeParts = [];
-    if (filterLabels.state) scopeParts.push(`entidad federativa «${filterLabels.state}»`);
-    if (filterLabels.municipality) scopeParts.push(`municipio «${filterLabels.municipality}»`);
-    if (filterLabels.school) scopeParts.push(`plantel «${filterLabels.school}»`);
     if (filterLabels.profile) scopeParts.push(`código Holland «${filterLabels.profile}»`);
     if (filterLabels.career) scopeParts.push(`carrera principal «${filterLabels.career}»`);
     if (filterLabels.from || filterLabels.to) {
@@ -1029,29 +984,9 @@ app.get('/api/admin/report.pdf', requireAdmin, async (req, res) => {
     );
     drawBarChart('Distribución por rango de afinidad', data.affinity, { maxBars: 6 });
 
-    newSection('6. Planteles y procedencia');
+    newSection('6. Registro detallado de evaluaciones recientes');
     formalParagraph(
-      'Se detalla la participación por escuela de procedencia y por municipio/estado, útil para contrastar cobertura territorial y carga de orientación por plantel.',
-    );
-    drawBarChart('Evaluaciones por escuela', data.schools, { maxBars: 8 });
-    drawBarChart('Evaluaciones por municipio / estado', data.provenance, { maxBars: 8 });
-
-    if ((data.languages ?? []).length || (data.idioms ?? []).length) {
-      newSection('7. Lenguas originarias e idiomas');
-      formalParagraph(
-        'Cuando los estudiantes declararon lenguas originarias o idiomas adicionales, se resume su frecuencia en el conjunto filtrado. Estos datos contextualizan la diversidad lingüística de la población atendida.',
-      );
-      if ((data.languages ?? []).length) {
-        drawBarChart('Lenguas originarias declaradas', data.languages, { maxBars: 8 });
-      }
-      if ((data.idioms ?? []).length) {
-        drawBarChart('Idiomas declarados', data.idioms, { maxBars: 8 });
-      }
-    }
-
-    newSection('8. Registro detallado de evaluaciones recientes');
-    formalParagraph(
-      'Se listan hasta cuarenta evaluaciones más recientes que cumplen los filtros. Cada fila indica procedencia, plantel, código Holland, carrera principal recomendada, afinidad y fecha de conclusión. Las respuestas abiertas complementarias, de existir, se indican de forma resumida.',
+      'Se listan hasta cuarenta evaluaciones más recientes que cumplen los filtros. Cada fila indica código Holland, carrera principal recomendada, afinidad y fecha de conclusión.',
     );
 
     const evalRows = (data.evaluations ?? []).slice(0, 40);
@@ -1067,12 +1002,10 @@ app.get('/api/admin/report.pdf', requireAdmin, async (req, res) => {
       const VPAD = 6;
       const headerH = 26;
       const cols = [
-        { key: 'fecha', w: 62, title: 'Fecha' },
-        { key: 'lugar', w: 110, title: 'Municipio / Edo.' },
-        { key: 'escuela', w: 100, title: 'Escuela' },
-        { key: 'holland', w: 40, title: 'Holland' },
-        { key: 'carrera', w: 135, title: 'Carrera principal' },
-        { key: 'afinidad', w: 48, title: 'Afinidad' },
+        { key: 'fecha', w: 80, title: 'Fecha' },
+        { key: 'holland', w: 70, title: 'Holland' },
+        { key: 'carrera', w: 245, title: 'Carrera principal' },
+        { key: 'afinidad', w: 60, title: 'Afinidad' },
       ];
       const weightSum = cols.reduce((sum, c) => sum + c.w, 0);
       for (const c of cols) c.w = (c.w * contentW) / weightSum;
@@ -1106,12 +1039,10 @@ app.get('/api/admin/report.pdf', requireAdmin, async (req, res) => {
         const fecha = row.completed_at
           ? new Date(row.completed_at).toLocaleDateString('es-MX')
           : '—';
-        const lugar = `${row.municipality_name ?? '—'}, ${row.state_name ?? '—'}`;
-        const escuela = String(row.school_name ?? '—');
         const holland = String(row.holland_code ?? '—');
         const carrera = String(row.top_career_name ?? '—');
         const afinidad = `${Number(row.top_career_affinity ?? 0).toFixed(1)}%`;
-        const values = [fecha, lugar, escuela, holland, carrera, afinidad];
+        const values = [fecha, holland, carrera, afinidad];
         // Alto medido por celda: el texto envuelve en vez de encimarse.
         const heights = values.map((v, i) =>
           doc.heightOfString(String(v), { width: cols[i].w - HPAD * 2 }),

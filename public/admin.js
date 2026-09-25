@@ -135,26 +135,6 @@ function filterOptions(select, attr, value) {
   if (select.selectedOptions[0]?.hidden) select.value = '';
 }
 
-const filterState = document.getElementById('filterState');
-const filterMunicipality = document.getElementById('filterMunicipality');
-const filterSchool = document.getElementById('filterSchool');
-function updateDashboardDependencies() {
-  filterOptions(filterMunicipality, 'state', filterState?.value ?? '');
-  filterOptions(filterSchool, 'municipality', filterMunicipality?.value ?? '');
-}
-filterState?.addEventListener('change', () => { if(filterMunicipality) filterMunicipality.value=''; if(filterSchool) filterSchool.value=''; updateDashboardDependencies(); });
-filterMunicipality?.addEventListener('change', () => { if(filterSchool) filterSchool.value=''; updateDashboardDependencies(); });
-updateDashboardDependencies();
-
-// Dependencia Estado > Municipio en alta/edición de escuelas.
-document.querySelectorAll('.dependent-form').forEach(form => {
-  const state = form.querySelector('.state-select');
-  const municipality = form.querySelector('.municipality-select');
-  const update = () => filterOptions(municipality, 'state', state?.value ?? '');
-  state?.addEventListener('change', () => { municipality.value=''; update(); });
-  update();
-});
-
 // Búsquedas locales dentro de cada catálogo.
 document.querySelectorAll('.catalog-search').forEach(input => {
   input.addEventListener('input', () => {
@@ -295,7 +275,6 @@ if (typeof Chart !== 'undefined') {
     new Chart(el,{type:'line',data:{labels:(rows||[]).map(x=>x.label),datasets:[{data:(rows||[]).map(x=>x.value),borderColor:'#0262fc',backgroundColor:'rgba(2,98,252,.10)',fill:true,tension:.3,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:ink}},y:{beginAtZero:true,grid:{color:grid},ticks:{color:ink,precision:0}}}}});
   };
   bar('careerChart',data.careers,true); doughnut('profileChart',data.profiles); line('affinityChart',data.affinity);
-  bar('provenanceChart',data.provenance,true); bar('schoolChart',data.schools,true); doughnut('languageChart',data.languages); doughnut('idiomChart',data.idioms);
 }
 
 
@@ -365,17 +344,14 @@ function renderChartsFromData(payload) {
   bar('careerChart', payload.careers, true);
   doughnut('profileChart', payload.profiles);
   line('affinityChart', payload.affinity);
-  bar('provenanceChart', payload.provenance, true);
-  bar('schoolChart', payload.schools, true);
-  doughnut('languageChart', payload.languages);
-  doughnut('idiomChart', payload.idioms);
+
 }
 
 function renderEvaluationRows(evaluations) {
   const tbody = document.getElementById('evaluationRows');
   if (!tbody) return;
   if (!(evaluations || []).length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">No hay evaluaciones para los filtros seleccionados.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No hay evaluaciones para los filtros seleccionados.</td></tr>';
     return;
   }
   tbody.innerHTML = evaluations.map(row => {
@@ -388,10 +364,6 @@ function renderEvaluationRows(evaluations) {
         }</div></details>`
       : '—';
     return `<tr>
-      <td><strong>${escapeHtml(row.municipality_name ?? 'No especificado')}</strong><small>${escapeHtml(row.state_name ?? '')}</small></td>
-      <td>${escapeHtml(row.school_name ?? 'No especificada')}</td>
-      <td>${escapeHtml(row.lenguas || '—')}</td>
-      <td>${escapeHtml(row.idiomas || '—')}</td>
       <td><span class="code">${escapeHtml(row.holland_code || '')}</span></td>
       <td>${escapeHtml(row.top_career_name || '')}</td>
       <td><span class="affinity">${Number(row.top_career_affinity ?? 0).toFixed(1)}%</span></td>
@@ -413,7 +385,6 @@ function updateKpis(totals) {
   const t = totals || {};
   const el = (id) => document.getElementById(id);
   if (el('kpiEvaluations')) el('kpiEvaluations').textContent = t.total_evaluations ?? 0;
-  if (el('kpiSchools')) el('kpiSchools').textContent = t.schools ?? 0;
   if (el('kpiProfiles')) el('kpiProfiles').textContent = t.profiles ?? 0;
   if (el('kpiAffinity')) {
     el('kpiAffinity').textContent = t.average_affinity != null ? `${t.average_affinity}%` : '—';

@@ -1,12 +1,18 @@
 # Panel Aevum Iter · Versión APPROD4.1.8
 
-> **Versión completa actual: `APPROD4.1.8_R11_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
+> **Versión completa actual: `APPROD4.1.8_R12_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
 > versión **4**, actualizaciones mayores **1**, actualizaciones medianas **8**,
-> revisión **11**, rama **IN** (Innovatec).
+> revisión **12**, rama **IN** (Innovatec).
 
 Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adaptada a Aevum Iter.
 
-## Revisión R11 (actual): corrección de sintaxis en pesos
+## Revisión R12 (actual): fuera procedencia y lenguas
+
+- Dashboard sin filtros estado/municipio/escuela, sin gráficas de procedencia/escuelas/lenguas/idiomas, registros con 5 columnas y KPI de 3 tarjetas; fuera 4 tabs/parciales de esos catálogos.
+- Servidor sin agregados de procedencia/lenguas, totales sin escuelas y PDF sin secciones 6–7 ni columnas de lugar/escuela.
+- Ingesta (`evaluations`, `students`) y esquema intactos a propósito. Sintaxis y render EJS verificados.
+
+## Revisión R11: corrección de sintaxis en pesos
 
 - `sql/schema.sql`: el reemplazo de los 66 pesos dejó sintaxis rota (`('isc','R',6.5)5.8` por índice de grupo erróneo en mi script). Reparado y validado: 66 tuplas bien formadas (6 por carrera), 11 códigos únicos, paréntesis y comillas balanceados, sin restos corruptos.
 
@@ -16,7 +22,7 @@ Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adapt
 
 ## Rebrand a Aevum Iter
 
-- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R11_IN`.
+- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R12_IN`.
 - Textos: servicio `aevum-iter-panel`, cookie `aevum_iter_admin`, login, dashboard, manifiesto PWA, SW (`aevum-admin-v1`), `db.js` y `schema.sql` (BD `aevum_iter`, URLs de carreras a `NULL`).
 - Iconos: `icon-192/512.png`, `apple-touch-icon.png` y `public/img/app-logo.png` generados del logo brújula; `assets/aevum_logo.png` para el PDF.
 - Eliminados assets institucionales (`tecnm_*`, `sep_*`, `escudo_*`, `cert_*`, `app_logo.png` anterior).
