@@ -1,12 +1,17 @@
 # Panel Aevum Iter · Versión APPROD4.1.8
 
-> **Versión completa actual: `APPROD4.1.8_R12_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
+> **Versión completa actual: `APPROD4.1.8_R13_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
 > versión **4**, actualizaciones mayores **1**, actualizaciones medianas **8**,
-> revisión **12**, rama **IN** (Innovatec).
+> revisión **13**, rama **IN** (Innovatec).
 
 Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adaptada a Aevum Iter.
 
-## Revisión R12 (actual): fuera procedencia y lenguas
+## Revisión R13 (actual): fuera pregunta abierta
+
+- Eliminado endpoint `PUT department-questions`, tarjeta por departamento, query de abiertas, columna `Respuestas` y `departmentQuestions` del payload admin. Tablas e ingesta intactas.
+- Sintaxis y render EJS verificados.
+
+## Revisión R12: fuera procedencia y lenguas
 
 - Dashboard sin filtros estado/municipio/escuela, sin gráficas de procedencia/escuelas/lenguas/idiomas, registros con 5 columnas y KPI de 3 tarjetas; fuera 4 tabs/parciales de esos catálogos.
 - Servidor sin agregados de procedencia/lenguas, totales sin escuelas y PDF sin secciones 6–7 ni columnas de lugar/escuela.
@@ -22,7 +27,7 @@ Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adapt
 
 ## Rebrand a Aevum Iter
 
-- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R12_IN`.
+- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R13_IN`.
 - Textos: servicio `aevum-iter-panel`, cookie `aevum_iter_admin`, login, dashboard, manifiesto PWA, SW (`aevum-admin-v1`), `db.js` y `schema.sql` (BD `aevum_iter`, URLs de carreras a `NULL`).
 - Iconos: `icon-192/512.png`, `apple-touch-icon.png` y `public/img/app-logo.png` generados del logo brújula; `assets/aevum_logo.png` para el PDF.
 - Eliminados assets institucionales (`tecnm_*`, `sep_*`, `escudo_*`, `cert_*`, `app_logo.png` anterior).

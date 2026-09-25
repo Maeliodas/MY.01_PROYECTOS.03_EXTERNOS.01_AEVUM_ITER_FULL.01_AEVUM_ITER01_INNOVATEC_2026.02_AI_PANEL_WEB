@@ -227,36 +227,6 @@ document.querySelectorAll('.delete-record').forEach(button => {
 
 
 
-// Pregunta complementaria única por departamento.
-document.querySelectorAll('.department-question-form').forEach(form => {
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    const department = form.dataset.department;
-    const questionText = form.querySelector('[name="question_text"]')?.value.trim() ?? '';
-    if (!department || !questionText) return;
-    const button = form.querySelector('button[type="submit"]');
-    const previous = button?.textContent;
-    if (button) {
-      button.disabled = true;
-      button.textContent = 'Guardando…';
-    }
-    try {
-      await api(`/api/admin/department-questions/${encodeURIComponent(department)}`, {
-        method: 'PUT',
-        body: JSON.stringify({question_text: questionText}),
-      });
-      if (button) button.textContent = 'Guardado ✓';
-      await softRefreshKeepContext();
-    } catch (error) {
-      alert(error.message);
-      if (button) {
-        button.disabled = false;
-        button.textContent = previous || 'Guardar pregunta';
-      }
-    }
-  });
-});
-
 // Gráficas del tablero.
 if (typeof Chart !== 'undefined') {
   const ink = '#33423a';
@@ -351,24 +321,18 @@ function renderEvaluationRows(evaluations) {
   const tbody = document.getElementById('evaluationRows');
   if (!tbody) return;
   if (!(evaluations || []).length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty">No hay evaluaciones para los filtros seleccionados.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">No hay evaluaciones para los filtros seleccionados.</td></tr>';
     return;
   }
   tbody.innerHTML = evaluations.map(row => {
     const fecha = row.completed_at
       ? new Date(row.completed_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
       : '—';
-    const open = (row.open_answers || []).length
-      ? `<details class="open-answer-details"><summary>Ver ${row.open_answers.length}</summary><div class="open-answer-list">${
-          row.open_answers.map(a => `<article><strong>${escapeHtml(a.career_name || '')}</strong><small>${escapeHtml(a.question_text || 'Pregunta complementaria')}</small><p>${escapeHtml(a.answer || '')}</p></article>`).join('')
-        }</div></details>`
-      : '—';
     return `<tr>
       <td><span class="code">${escapeHtml(row.holland_code || '')}</span></td>
       <td>${escapeHtml(row.top_career_name || '')}</td>
       <td><span class="affinity">${Number(row.top_career_affinity ?? 0).toFixed(1)}%</span></td>
       <td>${fecha}</td>
-      <td>${open}</td>
     </tr>`;
   }).join('');
 }

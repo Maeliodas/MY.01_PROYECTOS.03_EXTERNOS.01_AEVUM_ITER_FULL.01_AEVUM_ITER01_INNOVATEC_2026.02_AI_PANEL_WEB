@@ -63,9 +63,9 @@
 
         <section class="records card">
           <div class="records-head"><div><p class="eyebrow">EVALUACIONES</p><h2>Registros</h2><p>Perfil, carrera, afinidad y fecha.</p></div><label class="search">Buscar<input id="tableSearch" type="search" placeholder="Carrera, perfil…"></label></div>
-          <div class="table-wrap"><table><thead><tr><th>Perfil</th><th>Carrera recomendada</th><th>Afinidad</th><th>Fecha</th><th>Respuestas</th></tr></thead><tbody id="evaluationRows">
-          <% for (const row of data.evaluations ?? []) { %><tr><td><span class="code"><%= row.holland_code %></span></td><td><%= row.top_career_name %></td><td><span class="affinity"><%= Number(row.top_career_affinity ?? 0).toFixed(1) %>%</span></td><td><%= new Date(row.completed_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) %></td><td><% if((row.open_answers??[]).length){ %><details class="open-answer-details"><summary>Ver <%= row.open_answers.length %></summary><div class="open-answer-list"><% for(const a of row.open_answers){ %><article><strong><%= a.career_name %></strong><small><%= a.question_text || 'Pregunta complementaria' %></small><p><%= a.answer %></p></article><% } %></div></details><% } else { %>—<% } %></td></tr><% } %>
-          <% if (!(data.evaluations ?? []).length) { %><tr><td colspan="5" class="empty">No hay evaluaciones para los filtros seleccionados.</td></tr><% } %>
+          <div class="table-wrap"><table><thead><tr><th>Perfil</th><th>Carrera recomendada</th><th>Afinidad</th><th>Fecha</th></tr></thead><tbody id="evaluationRows">
+          <% for (const row of data.evaluations ?? []) { %><tr><td><span class="code"><%= row.holland_code %></span></td><td><%= row.top_career_name %></td><td><span class="affinity"><%= Number(row.top_career_affinity ?? 0).toFixed(1) %>%</span></td><td><%= new Date(row.completed_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) %></td></tr><% } %>
+          <% if (!(data.evaluations ?? []).length) { %><tr><td colspan="4" class="empty">No hay evaluaciones para los filtros seleccionados.</td></tr><% } %>
           </tbody></table></div>
         </section>
       </section>

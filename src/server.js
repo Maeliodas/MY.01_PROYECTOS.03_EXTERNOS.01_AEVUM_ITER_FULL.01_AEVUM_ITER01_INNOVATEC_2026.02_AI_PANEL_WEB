@@ -27,7 +27,7 @@ function notifyAdmins(event, payload = {}) {
 
 
 const port = Number(process.env.PORT ?? 8080);
-const panelVersion = 'APPROD4.1.8_R12_IN';
+const panelVersion = 'APPROD4.1.8_R13_IN';
 const apiIngestKey = process.env.API_INGEST_KEY ?? '';
 const adminUser = process.env.ADMIN_USER ?? '';
 const adminPassword = process.env.ADMIN_PASSWORD ?? '';
@@ -358,42 +358,17 @@ async function dashboardData(query = {}) {
      ORDER BY e.completed_at DESC, e.id DESC LIMIT 300`,
     params,
   );
-  const [openAnswers] = await pool.query(
-    `SELECT oa.evaluation_id, c.name career_name,
-            COALESCE(NULLIF(oa.question_text,''), dq.question_text) question_text, oa.answer
-       FROM evaluation_open_answers oa
-       JOIN careers c ON c.id=oa.career_id
-       LEFT JOIN department_open_questions dq ON dq.department=c.department
-       JOIN evaluations e ON e.id=oa.evaluation_id
-       JOIN students s ON s.id=e.student_id
-       LEFT JOIN schools sc ON sc.id=s.school_id
-       LEFT JOIN municipalities m ON m.id=sc.municipality_id
-       LEFT JOIN states st ON st.id=m.state_id
-       LEFT JOIN catalog_suggestions cs ON cs.id=s.school_suggestion_id AND cs.kind='escuela'
-       LEFT JOIN municipalities pm ON pm.id=cs.municipality_id
-       LEFT JOIN states pst ON pst.id=pm.state_id
-       ${where}
-       ORDER BY e.completed_at DESC, oa.id`,
-    params,
-  );
-  const answersByEvaluation = {};
-  for (const row of openAnswers) {
-    answersByEvaluation[row.evaluation_id] ??= [];
-    answersByEvaluation[row.evaluation_id].push(row);
-  }
-  for (const row of recentEvaluations) row.open_answers = answersByEvaluation[row.id] ?? [];
   return { totals, careers, profiles, affinity, evaluations: recentEvaluations };
 }
 
 async function catalogAdminData() {
-  const [[meta], [states], [municipalities], [schools], [languages], [careers], [departmentQuestions], [questions], [weights], [careerQuestions]] = await Promise.all([
+  const [[meta], [states], [municipalities], [schools], [languages], [careers], [questions], [weights], [careerQuestions]] = await Promise.all([
     pool.query('SELECT version,updated_at FROM catalog_meta WHERE id=1'),
     pool.query('SELECT * FROM states ORDER BY active DESC,name'),
     pool.query(`SELECT m.*,s.name state_name FROM municipalities m JOIN states s ON s.id=m.state_id ORDER BY m.active DESC,s.name,m.name`),
     pool.query(`SELECT sc.*,m.state_id,s.name state_name,m.name municipality_name FROM schools sc LEFT JOIN municipalities m ON m.id=sc.municipality_id LEFT JOIN states s ON s.id=m.state_id ORDER BY sc.active DESC,sc.name`),
     pool.query('SELECT * FROM languages ORDER BY active DESC,kind,name'),
     pool.query('SELECT * FROM careers ORDER BY active DESC,name'),
-    pool.query('SELECT * FROM department_open_questions ORDER BY department'),
     pool.query('SELECT * FROM questions ORDER BY active DESC,position,id'),
     pool.query('SELECT career_id,dimension,weight FROM career_riasec_weights'),
     pool.query('SELECT career_id,question_id FROM career_questions ORDER BY question_id'),
@@ -409,7 +384,7 @@ async function catalogAdminData() {
     questionMap[row.career_id].push(row.question_id);
   }
   const careersWithRules = careers.map(row => ({...row, weights: weightMap[row.id] ?? {}, question_ids: questionMap[row.id] ?? []}));
-  return { meta: meta ?? { version: 1 }, states, municipalities, schools, languages, careers: careersWithRules, departmentQuestions, departments: DEPARTMENTS, questions };
+  return { meta: meta ?? { version: 1 }, states, municipalities, schools, languages, careers: careersWithRules, departments: DEPARTMENTS, questions };
 }
 
 app.get('/api/dashboard/summary', requireAdmin, async (req, res) => {
@@ -618,26 +593,6 @@ app.put('/api/admin/catalog/:type/:id', requireAdmin, async (req, res) => {
   }
 });
 
-app.put('/api/admin/department-questions/:department', requireAdmin, async (req, res) => {
-  try {
-    const department = validateDepartment(req.params.department);
-    const questionText = String(req.body.question_text ?? '').trim();
-    if (!questionText) return res.status(400).json({ error: 'La pregunta es obligatoria.' });
-    if (questionText.length > 800) return res.status(400).json({ error: 'La pregunta es demasiado larga.' });
-    await pool.execute(
-      `INSERT INTO department_open_questions(department,question_text)
-       VALUES(?,?)
-       ON DUPLICATE KEY UPDATE question_text=VALUES(question_text)`,
-      [department, questionText],
-    );
-    await bumpCatalogVersion();
-    notifyAdmins('catalog-updated', { type: 'department-questions', action: 'update', department });
-    res.json({ ok: true });
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: error.sqlMessage ?? error.message ?? 'No fue posible guardar la pregunta departamental' });
-  }
-});
 
 app.delete('/api/admin/catalog/:type/:id', requireAdmin, async (req, res) => {
   const type = req.params.type;
