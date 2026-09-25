@@ -1,6 +1,6 @@
 {
   "name": "aevum-iter-admin-panel",
-  "version": "4.1.8-19",
+  "version": "4.1.8-20",
   "private": true,
   "type": "module",
   "scripts": {

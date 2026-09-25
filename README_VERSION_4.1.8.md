@@ -1,12 +1,16 @@
 # Panel Aevum Iter · Versión APPROD4.1.8
 
-> **Versión completa actual: `APPROD4.1.8_R19_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
+> **Versión completa actual: `APPROD4.1.8_R20_IN`** — siglas **AP** (Admin Panel, pegadas), canal **PROD**,
 > versión **4**, actualizaciones mayores **1**, actualizaciones medianas **8**,
-> revisión **19**, rama **IN** (Innovatec).
+> revisión **20**, rama **IN** (Innovatec).
 
 Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adaptada a Aevum Iter.
 
-## Revisión R19 (actual): ids en selects de filtro
+## Revisión R20 (actual): favicon del panel
+
+- `public/favicon.png` (32px, brújula) + `<link rel="icon">` en dashboard y login. Iconos 192/512/180 y logo verificados. Render EJS verificado.
+
+## Revisión R19: ids en selects de filtro
 
 - Los `<select>` de perfil/carrera no tenían `id`: el JS los buscaba y no los encontraba (fallo silencioso). Agregados `filterProfile`/`filterCareer`. Render verificado.
 - `package.json` → `4.1.8-19`.
@@ -56,7 +60,7 @@ Origen: copia de `admin_panel` de App Vocacional ITTUX (sin historial git) adapt
 
 ## Rebrand a Aevum Iter
 
-- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R19_IN`.
+- `package.json`: `aevum-iter-admin-panel`, `4.1.8-10`. `panelVersion`: `APPROD4.1.8_R20_IN`.
 - Textos: servicio `aevum-iter-panel`, cookie `aevum_iter_admin`, login, dashboard, manifiesto PWA, SW (`aevum-admin-v1`), `db.js` y `schema.sql` (BD `aevum_iter`, URLs de carreras a `NULL`).
 - Iconos: `icon-192/512.png`, `apple-touch-icon.png` y `public/img/app-logo.png` generados del logo brújula; `assets/aevum_logo.png` para el PDF.
 - Eliminados assets institucionales (`tecnm_*`, `sep_*`, `escudo_*`, `cert_*`, `app_logo.png` anterior).
