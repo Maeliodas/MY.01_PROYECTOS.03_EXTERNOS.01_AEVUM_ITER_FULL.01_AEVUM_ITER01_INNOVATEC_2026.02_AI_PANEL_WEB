@@ -27,7 +27,7 @@ function notifyAdmins(event, payload = {}) {
 
 
 const port = Number(process.env.PORT ?? 8080);
-const panelVersion = 'APPROD4.1.8_R10_IN';
+const panelVersion = 'APPROD4.1.8_R11_IN';
 const apiIngestKey = process.env.API_INGEST_KEY ?? '';
 const adminUser = process.env.ADMIN_USER ?? '';
 const adminPassword = process.env.ADMIN_PASSWORD ?? '';
